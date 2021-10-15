@@ -155,5 +155,6 @@ services:
             - "@session.flash_bag"
             - "@translator"
             - "@router"
+            - "@twig"
         tags:
             - { name: controller.service_arguments }
