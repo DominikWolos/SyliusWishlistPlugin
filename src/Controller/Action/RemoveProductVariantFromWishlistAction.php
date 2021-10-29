@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace BitBag\SyliusWishlistPlugin\Controller\Action;
 
-use BitBag\SyliusWishlistPlugin\Context\WishlistContextInterface;
+use BitBag\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Core\Repository\ProductVariantRepositoryInterface;
@@ -24,7 +24,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class RemoveProductVariantFromWishlistAction
 {
-    private WishlistContextInterface $wishlistContext;
+    private WishlistRepositoryInterface $wishlistRepository;
 
     private ProductVariantRepositoryInterface $productVariantRepository;
 
@@ -37,14 +37,14 @@ final class RemoveProductVariantFromWishlistAction
     private UrlGeneratorInterface $urlGenerator;
 
     public function __construct(
-        WishlistContextInterface $wishlistContext,
+        WishlistRepositoryInterface $wishlistRepository,
         ProductVariantRepositoryInterface $productVariantRepository,
         EntityManagerInterface $wishlistProductManager,
         FlashBagInterface $flashBag,
         TranslatorInterface $translator,
         UrlGeneratorInterface $urlGenerator
     ) {
-        $this->wishlistContext = $wishlistContext;
+        $this->wishlistRepository = $wishlistRepository;
         $this->productVariantRepository = $productVariantRepository;
         $this->wishlistProductManager = $wishlistProductManager;
         $this->urlGenerator = $urlGenerator;
@@ -52,16 +52,15 @@ final class RemoveProductVariantFromWishlistAction
         $this->translator = $translator;
     }
 
-    public function __invoke(Request $request): Response
+    public function __invoke(int $wishlistId, Request $request): Response
     {
         /** @var ProductVariantInterface|null $variant */
         $variant = $this->productVariantRepository->find($request->get('variantId'));
-
         if (null === $variant) {
             throw new NotFoundHttpException();
         }
 
-        $wishlist = $this->wishlistContext->getWishlist($request);
+        $wishlist = $this->wishlistRepository->find($wishlistId);
 
         foreach ($wishlist->getWishlistProducts() as $wishlistProduct) {
             if ($variant === $wishlistProduct->getVariant()) {
@@ -72,6 +71,9 @@ final class RemoveProductVariantFromWishlistAction
         $this->wishlistProductManager->flush();
         $this->flashBag->add('success', $this->translator->trans('bitbag_sylius_wishlist_plugin.ui.removed_wishlist_item'));
 
-        return new RedirectResponse($this->urlGenerator->generate('bitbag_sylius_wishlist_plugin_shop_wishlist_list_products'));
+        return new RedirectResponse($this->urlGenerator->generate('bitbag_sylius_wishlist_plugin_shop_wishlist_show_chosen_wishlist', [
+            'wishlistId' => $wishlistId,
+        ])
+        );
     }
 }
