@@ -105,7 +105,6 @@ services:
             - "@form.factory"
             - '@twig'
             - '@bitbag_sylius_wishlist_plugin.controller.action.add_product_variant_to_wishlist'
-            - '@api_platform.router'
             - '@session.flash_bag'
             - "@sylius.repository.product_variant"
             - '@translator'
