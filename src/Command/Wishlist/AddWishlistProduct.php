@@ -1,18 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace BitBag\SyliusWishlistPlugin\Command\Wishlist;
 
 use BitBag\SyliusWishlistPlugin\Entity\WishlistProductInterface;
 use Sylius\Bundle\OrderBundle\Controller\AddToCartCommandInterface;
-use Sylius\Component\Core\Model\OrderItemInterface;
 
 class AddWishlistProduct
 {
-    /** @var WishlistProductInterface  */
     private WishlistProductInterface $wishlistProduct;
 
-    /** @var AddToCartCommandInterface  */
     private AddToCartCommandInterface $cartItem;
 
     private bool $selected;
@@ -46,6 +44,4 @@ class AddWishlistProduct
     {
         $this->cartItem = $cartItem;
     }
-
 }
-
