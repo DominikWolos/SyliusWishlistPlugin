@@ -21,8 +21,9 @@ use Tests\BitBag\SyliusWishlistPlugin\Behat\Page\Shop\WishlistPageInterface;
 use Tests\BitBag\SyliusWishlistPlugin\Behat\Service\LoginerInterface;
 use Tests\BitBag\SyliusWishlistPlugin\Behat\Service\WishlistCreatorInterface;
 use Webmozart\Assert\Assert;
+use Behat\MinkExtension\Context\MinkContext;
 
-final class WishlistContext implements Context
+final class WishlistContext extends MinkContext implements Context
 {
     private ProductRepositoryInterface $productRepository;
 
@@ -222,4 +223,37 @@ final class WishlistContext implements Context
     {
         Assert::true($this->wishlistPage->hasProductOutOfStockValidationMessage($product));
     }
+
+    /**
+     * @Given I fill :arg1 with :arg2
+     */
+    public function iFillWith($arg1, $arg2)
+    {
+        $this->getSession()->getPage()->fillField($arg1, $arg2);
+    }
+
+    /**
+     * @Given I press  :arg1
+     */
+    public function iPress($arg1)
+    {
+        $this->getSession()->getPage()->pressButton($arg1);
+    }
+
+    /**
+     * @Then I should be on my list of wishlists page
+     */
+    public function iShouldBeOnMyListOfWishlistsPage()
+    {
+        $this->visitPath('/wishlists');
+    }
+
+    /**
+     * @Then I should be notified that the new wishlist has been created
+     */
+    public function iShouldBeNotifiedThatTheNewWishlistHasBeenCreated(): void
+    {
+        $this->notificationChecker->checkNotification('New wishlist has been created.', NotificationType::success());
+    }
+
 }
