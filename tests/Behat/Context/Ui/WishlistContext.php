@@ -22,8 +22,9 @@ use Tests\BitBag\SyliusWishlistPlugin\Behat\Service\LoginerInterface;
 use Tests\BitBag\SyliusWishlistPlugin\Behat\Service\WishlistCreatorInterface;
 use Webmozart\Assert\Assert;
 use Behat\MinkExtension\Context\MinkContext;
+use Behat\MinkExtension\Context\RawMinkContext;
 
-final class WishlistContext extends MinkContext implements Context
+final class WishlistContext extends RawMinkContext implements Context
 {
     private ProductRepositoryInterface $productRepository;
 
@@ -225,6 +226,15 @@ final class WishlistContext extends MinkContext implements Context
     }
 
     /**
+     * @Given I am on :arg1
+     */
+    public function iAmOn($arg1)
+    {
+        $this->visitPath($arg1);
+    }
+
+
+    /**
      * @Given I fill :arg1 with :arg2
      */
     public function iFillWith($arg1, $arg2)
@@ -255,5 +265,4 @@ final class WishlistContext extends MinkContext implements Context
     {
         $this->notificationChecker->checkNotification('New wishlist has been created.', NotificationType::success());
     }
-
 }
