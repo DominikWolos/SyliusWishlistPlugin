@@ -12,6 +12,7 @@ namespace BitBag\SyliusWishlistPlugin\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Sylius\Component\Channel\Model\ChannelInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Core\Model\ShopUserInterface;
@@ -20,6 +21,8 @@ class Wishlist implements WishlistInterface
 {
     protected ?int $id = null;
 
+    protected ?string $name;
+
     /** @var Collection|WishlistProductInterface[] */
     protected $wishlistProducts;
 
@@ -27,6 +30,8 @@ class Wishlist implements WishlistInterface
 
     /** @var WishlistTokenInterface|null */
     protected $token;
+
+    protected ?ChannelInterface $channel;
 
     public function __construct()
     {
@@ -38,6 +43,16 @@ class Wishlist implements WishlistInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
     }
 
     public function getProducts(): Collection
@@ -150,5 +165,20 @@ class Wishlist implements WishlistInterface
         }
 
         return $this;
+    }
+
+    public function clear(): void
+    {
+        $this->wishlistProducts = new ArrayCollection();
+    }
+
+    public function getChannel(): ?ChannelInterface
+    {
+        return $this->channel;
+    }
+
+    public function setChannel(?ChannelInterface $channel): void
+    {
+        $this->channel = $channel;
     }
 }

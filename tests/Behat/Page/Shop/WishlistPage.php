@@ -16,14 +16,57 @@ use Sylius\Component\Core\Model\ProductInterface;
 
 class WishlistPage extends SymfonyPage implements WishlistPageInterface
 {
+    /**
+     * Works only with 1 wishlist
+     * For case with many wishlists @see getProductElements
+     */
     public function getItemsCount(): int
     {
-        return (int) $this->getDocument()->find('css', '[data-test-wishlist-primary-items-count]')->getText();
+        return (int) $this->getElement('items_count')->getText();
+    }
+
+    public function getProductElements(): int
+    {
+        $productElements = $this->getDocument()->findAll('css', '[data-test-wishlist-item-name]');
+
+        return count($productElements);
+    }
+
+    public function addProductToSelectedWishlist(string $productName, string $wishlistName): void
+    {
+        $productElements = $this->getDocument()->findAll('named', ['link', $wishlistName]);
+
+        /** @var NodeElement $productElement */
+        foreach ($productElements as $productElement) {
+            if ($productName === $productElement->getAttribute('data-product-name')) {
+                $productElement->click();
+            }
+        }
+    }
+
+    public function selectedWishlistAction(string $action, string $wishlistName): void
+    {
+        $wishlists = $this->getDocument()->findAll('css', sprintf('[data-test-wishlist-wishlist-%s]', $action));
+
+        foreach ($wishlists as $wishlist) {
+            if ($wishlistName === $wishlist->getAttribute('data-wishlist-name')) {
+                $wishlist->click();
+
+                return;
+            }
+        }
+    }
+
+    public function getWishlistsCount(): int
+    {
+        $wishlists = $this->getDocument()->findAll('css', '[data-test-wishlist-wishlist]');
+
+        return count($wishlists);
     }
 
     public function hasProduct(string $productName): bool
     {
-        $productElements = $this->getDocument()->findAll('css', '[data-test-wishlisst-item-name]');
+        $productElements = $this->getDocument()->findAll('css', '[data-test-wishlist-item-name]');
 
         /** @var NodeElement $productElement */
         foreach ($productElements as $productElement) {
@@ -33,6 +76,18 @@ class WishlistPage extends SymfonyPage implements WishlistPageInterface
         }
 
         return false;
+    }
+
+    public function showChosenWishlist(string $wishlistName): void
+    {
+        $wishlistElements = $this->getDocument()->findAll('css', '[data-test-wishlist-wishlist]');
+
+        /** @var NodeElement $wishlistElement */
+        foreach ($wishlistElements as $wishlistElement) {
+            if ($wishlistName === $wishlistElement->getAttribute('data-wishlist-name')) {
+                $wishlistElement->click();
+            }
+        }
     }
 
     public function removeProduct(string $productName): void
@@ -45,6 +100,16 @@ class WishlistPage extends SymfonyPage implements WishlistPageInterface
                 $wishlistElement->click();
             }
         }
+    }
+
+    public function removeSelectedProductsFromWishlist(): void
+    {
+        $this->getElement('remove_selected')->press();
+    }
+
+    public function exportToPdfSelectedProductsFromWishlist(): void
+    {
+        $this->getElement('export_selected_pdf')->press();
     }
 
     public function selectProductQuantity(string $productName, int $quantity): void
@@ -62,7 +127,31 @@ class WishlistPage extends SymfonyPage implements WishlistPageInterface
 
     public function addProductToCart(): void
     {
-        $this->getDocument()->find('css', '[data-test-wishlist-add-all-to-cart]')->press();
+        $this->getElement('add')->press();
+    }
+
+    public function addSelectedProductsToCart(): void
+    {
+        $this->getElement('add_selected')->press();
+    }
+
+    public function copySelectedProducts(string $wishlistName): void
+    {
+        $copyElements = $this->getDocument()->findAll('css', '[wishlist-copy-to-wishlist]');
+
+        /** @var NodeElement $copyElement */
+        foreach ($copyElements as $copyElement) {
+            if ($wishlistName === $copyElement->getAttribute('data-wishlist-name')) {
+                $copyElement->click();
+
+                return;
+            }
+        }
+    }
+
+    public function exportSelectedProductsToCsv(): void
+    {
+        $this->getElement('export_selected_csv')->press();
     }
 
     public function hasProductInCart(string $productName): bool
@@ -72,7 +161,7 @@ class WishlistPage extends SymfonyPage implements WishlistPageInterface
         return $productName === $productNameOnPage;
     }
 
-    public function hasProductOutOfStockValidationMessage(ProductInterface $product)
+    public function hasProductOutOfStockValidationMessage(ProductInterface $product): bool
     {
         $outOfStockValidationErrorElement = $this->getDocument()->find('css', '.sylius-flash-message p');
 
@@ -85,8 +174,38 @@ class WishlistPage extends SymfonyPage implements WishlistPageInterface
         return $outOfStockValidationErrorElement->getText() === $message;
     }
 
+    public function hasWishlistClearedValidationMessage(): bool
+    {
+        $hasWishlistClearedValidationMessage = $this->getDocument()->find('css', '.sylius-flash-message p');
+
+        if (null === $hasWishlistClearedValidationMessage) {
+            return false;
+        }
+
+        $message = 'Wishlist has been cleared.';
+
+        return $hasWishlistClearedValidationMessage->getText() === $message;
+    }
+
     public function getRouteName(): string
     {
         return 'bitbag_sylius_wishlist_plugin_shop_wishlist_list_products';
+    }
+
+    protected function getDefinedElements(): array
+    {
+        return [
+            'add' => '[data-test-wishlist-add-all-to-cart]',
+            'add_selected' => '[data-test-wishlist-add-selected-to-cart]',
+            'remove_selected' => '[data-test-wishlist-remove-selected-from-wishlist]',
+            'items_count' => '[data-test-wishlist-primary-items-count]',
+            'export_selected_csv' => '[data-test-wishlist-export-to-csv]',
+            'export_selected_pdf' => '[data-test-wishlist-export-to-pdf-from-wishlist]',
+        ];
+    }
+
+    public function waitForOneSecond()
+    {
+        $this->getDriver()->wait(1000, 'false == true');
     }
 }

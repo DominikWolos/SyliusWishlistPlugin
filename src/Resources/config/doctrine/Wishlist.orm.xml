@@ -9,18 +9,26 @@
         <id name="id" column="id" type="integer">
             <generator strategy="AUTO" />
         </id>
+        <field name="name" type="string" column="name" nullable="true" />
 
-        <field name="token" type="string" column="token" unique="true" />
+        <field name="token" type="string" column="token" />
 
-        <one-to-many field="wishlistProducts" target-entity="BitBag\SyliusWishlistPlugin\Entity\WishlistProductInterface" mapped-by="wishlist" orphan-removal="true">
+        <one-to-many field="wishlistProducts" 
+                     target-entity="BitBag\SyliusWishlistPlugin\Entity\WishlistProductInterface" 
+                     mapped-by="wishlist" orphan-removal="true"
+        >
             <cascade>
                 <cascade-all />
             </cascade>
         </one-to-many>
 
-        <one-to-one field="shopUser" target-entity="Sylius\Component\Core\Model\ShopUserInterface">
+        <many-to-one field="shopUser" target-entity="Sylius\Component\Core\Model\ShopUserInterface">
             <join-column name="shop_user_id" referenced-column-name="id" nullable="true" on-delete="CASCADE" />
-        </one-to-one>
+        </many-to-one>
+
+        <many-to-one field="channel" target-entity="Sylius\Component\Channel\Model\Channel">
+            <join-column name="channel_id" on-delete="CASCADE" />
+        </many-to-one>
 
     </mapped-superclass>
 

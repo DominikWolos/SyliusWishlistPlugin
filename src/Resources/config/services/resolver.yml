@@ -4,4 +4,18 @@ services:
         arguments:
             - "@bitbag_sylius_wishlist_plugin.repository.wishlist"
             - "@bitbag_sylius_wishlist_plugin.custom_factory.wishlist"
+            - "@sylius.context.channel"
 
+    bitbag_sylius_wishlist_plugin.resolver.wishlists_resolver:
+        class: BitBag\SyliusWishlistPlugin\Resolver\WishlistsResolver
+        arguments:
+            - "@bitbag_sylius_wishlist_plugin.repository.wishlist"
+            - "@security.token_storage"
+            - "@bitbag_sylius_wishlist_plugin.resolver.wishlist_cookie_token_resolver"
+            - "@sylius.context.channel"
+
+    bitbag_sylius_wishlist_plugin.resolver.wishlist_cookie_token_resolver:
+        class: BitBag\SyliusWishlistPlugin\Resolver\WishlistCookieTokenResolver
+        arguments:
+            - "@request_stack"
+            - "%bitbag_sylius_wishlist_plugin.parameters.wishlist_cookie_token%"
